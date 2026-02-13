@@ -1,15 +1,35 @@
 import requests
 
-URL = "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en"
-def generate_facts():
-    while True:
-        choice = input("press g to generate facts and press q to quit")
-        if choice == 'g':
-            response = requests.get(URL)
-            if response.status_code == 200:
-                data = response.json()
-                print(data['text'])
+url = "https://opentdb.com/api.php?amount=5&type=multiple"
+
+response = requests.get(url)
+
+if response.status_code == 200:
+
+    trivia_data = response.json()
+
+    score = 0
+
+    for i, question_data in enumerate(trivia_data["results"]):
+
+        print(f"Question {i + 1}:{question_data['question']}")
+        
+        options = question_data['incorrect_answers'] + [question_data['correct_answer']]
+
+        options = sorted(options)
+        for j , option in enumerate(options):
+           print(f"{j + 1}. {option}")
+        user_answer = input("your answer(1/2/3/4):")
+
+        if options[int(user_answer) - 1] == question_data["correct_answer"]:
+            print("Correct!😊")
+
         else:
-            print("Goodbye")
-if __name__ == "__main__":
-    generate_facts()   
+            print(f"Wrong! The correct answer was: {question_data['correct_answer']}")
+
+        print("\n")
+
+        print(f"Your final score: {score}/{len(trivia_data['results'])}")
+else:
+    print("Failed to retrive trivia")
+    exit()
