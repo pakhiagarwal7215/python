@@ -1,35 +1,26 @@
+from config import hf_api_key
 import requests
+model = "facebook/bart-large-mnli"
+base_URL = "https://router.huggingface.co/hf-inference/models/"
+API_url = base_URL+model
 
-url = "https://opentdb.com/api.php?amount=5&type=multiple"
+headers={
+         "Authorization":f"Bearer {hf_api_key}"
+        }
+topics=["sports","technology","bussiness", "entertainment","productivity"]
 
-response = requests.get(url)
+print("Welcome to news headlines! I will guess what topic you are talking about")
+Headline = input("Please enter a headline: ")
+
+payload={
+    "inputs":Headline,
+    "parameters":{"candidate_labels":topics}
+}
+
+response=requests.post(API_url,headers=headers,json=payload)
 
 if response.status_code == 200:
-
-    trivia_data = response.json()
-
-    score = 0
-
-    for i, question_data in enumerate(trivia_data["results"]):
-
-        print(f"Question {i + 1}:{question_data['question']}")
-        
-        options = question_data['incorrect_answers'] + [question_data['correct_answer']]
-
-        options = sorted(options)
-        for j , option in enumerate(options):
-           print(f"{j + 1}. {option}")
-        user_answer = input("your answer(1/2/3/4):")
-
-        if options[int(user_answer) - 1] == question_data["correct_answer"]:
-            print("Correct!😊")
-
-        else:
-            print(f"Wrong! The correct answer was: {question_data['correct_answer']}")
-
-        print("\n")
-
-        print(f"Your final score: {score}/{len(trivia_data['results'])}")
-else:
-    print("Failed to retrive trivia")
-    exit()
+    data = response.json()
+    T=data[0]
+    print(T)
+    
