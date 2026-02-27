@@ -1,32 +1,26 @@
 from config import hf_api_key
 import requests
 from colorama import Fore,Style,init
+from io import BytesIO
+from PIL import Image
+init(autoreset = True)
 
-init(autoreset=True)
-
-model= "google/pegasus-xsum"
+model = "stabilityai/stable-diffusion-xl-base-1.0"
 base_url = "https://router.huggingface.co/hf-inference/models/"
-api = base_url+model
+API_url = base_url+model
+headers = {"Authorization":f"Bearer {hf_api_key}"}
 
-header = {
-    "Authorization": f"Bearer {hf_api_key}",
-    "Content-Type": "application/json"
-}
+text = input("enter a prompt to create an image:")
+payload = {"inputs":
+           text}
 
-text = input("Enter the paragraph ;")
-min_length = 30
-max_length = 150
-payload = {"inputs": text,"parameters":{"min_length":min_length,"max_length": max_length}}
-print(Fore.BLUE + Style.BRIGHT + f"\n???? Performing AI summarization using model: {model}")
-response = requests.post(api,headers=header,json=payload)
-
-#print(Fore.GREEN+Style.BRIGHT+f"response code is :{response.status_code}")
+response = requests.post(API_url,headers=headers,json=payload)
 if response.status_code == 200:
-    result = response.json()
-    print(Fore.GREEN + Style.BRIGHT +
-          "\n✅ Summary:\n")
-    print(result[0]["summary_text"])
+    # this will ensure the response is an image
+    if 'image' in response.headers.get('Content-Type',''):
+        image = Image.open(BytesIO(response.content))
+        image.show()
+    else:
+        print("Error the content type is not an image")
 else:
-    print(Fore.RED + "\n❌ Error:")
-    print(response.text)
-
+    print(f"Error the status code is = {response.status_code}")    
